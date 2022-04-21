@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Nokia</string>
+    <string name="description_left_down_button">Turn left / down</string>
+    <string name="description_right_up_button">Turn right / up</string>
+</resources>

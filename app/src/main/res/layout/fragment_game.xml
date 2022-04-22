@@ -8,35 +8,76 @@
         android:id="@+id/game_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/button_left_down"
+        app:layout_constraintBottom_toTopOf="@id/image_left"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/button_left_down"
+        android:id="@+id/image_left"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/description_left_down_button"
         android:padding="24dp"
         android:scaleType="center"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/button_right_up"
+        app:layout_constraintEnd_toStartOf="@id/image_down"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/button_left_down_48dp" />
+        app:srcCompat="@drawable/ic_left_48dp" />
 
     <ImageView
-        android:id="@+id/button_right_up"
+        android:id="@+id/image_down"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/description_left_down_button"
+        android:padding="24dp"
+        android:scaleType="center"
+        app:layout_constraintEnd_toStartOf="@id/image_up"
+        app:layout_constraintStart_toEndOf="@id/image_left"
+        app:layout_constraintTop_toTopOf="@id/image_left"
+        app:srcCompat="@drawable/ic_down_48dp" />
+
+    <ImageView
+        android:id="@+id/image_up"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:contentDescription="@string/description_right_up_button"
         android:padding="24dp"
-        android:rotation="180"
         android:scaleType="center"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/image_right"
+        app:layout_constraintStart_toEndOf="@id/image_down"
+        app:layout_constraintTop_toTopOf="@id/image_down"
+        app:srcCompat="@drawable/ic_up_48dp" />
+
+    <ImageView
+        android:id="@+id/image_right"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/description_right_up_button"
+        android:padding="24dp"
+        android:scaleType="center"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/button_left_down"
-        app:srcCompat="@drawable/button_left_down_48dp" />
+        app:layout_constraintStart_toEndOf="@id/image_up"
+        app:layout_constraintTop_toTopOf="@id/image_up"
+        app:srcCompat="@drawable/ic_right_48dp" />
+
+    <View
+        android:id="@+id/button_left_down"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toBottomOf="@id/image_left"
+        app:layout_constraintEnd_toEndOf="@id/image_down"
+        app:layout_constraintStart_toStartOf="@id/image_left"
+        app:layout_constraintTop_toTopOf="@id/image_left" />
+
+    <View
+        android:id="@+id/button_right_up"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?selectableItemBackgroundBorderless"
+        app:layout_constraintBottom_toBottomOf="@id/image_up"
+        app:layout_constraintEnd_toEndOf="@id/image_right"
+        app:layout_constraintStart_toStartOf="@id/image_up"
+        app:layout_constraintTop_toTopOf="@id/image_up" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

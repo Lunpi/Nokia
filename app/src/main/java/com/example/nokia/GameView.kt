@@ -16,7 +16,7 @@ class GameView @JvmOverloads constructor(
 
     private val unit = resources.getDimension(R.dimen.unit_size).toInt()
 
-    val snake = Snake(context, unit, unit, unit)
+    val snake = Snake(context, unit * 3, unit * 3, unit)
     lateinit var apple: Apple
 
     init {

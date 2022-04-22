@@ -15,17 +15,20 @@ class Snake(private val context: Context, var x: Int, var y: Int, private val si
     // prevent clicking the turn button rapidly which causes direction changes multiple times
     private var directionLock = false
 
-    // to decide where should the snake grows
-    private val tail = SnakeBody(x - unit, y)
-
     private val paint = Paint().apply {
         color = ContextCompat.getColor(context, R.color.black)
         style = Paint.Style.FILL_AND_STROKE
     }
 
     val body = ArrayList<SnakeBody>().apply {
-        add(SnakeBody(x, y))
+        // initial length: 3
+        for (i in 2 downTo 0) {
+            add(SnakeBody(x - (i * unit), y))
+        }
     }
+
+    // to decide where should the snake grows
+    private val tail = SnakeBody(body.first().x - unit, y)
 
     var status = STATUS_ALIVE
 

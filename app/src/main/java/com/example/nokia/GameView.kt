@@ -41,13 +41,27 @@ class GameView @JvmOverloads constructor(
         snake.move(width, height)
 
         // check collision
-        if (snake.x == apple.x && snake.y == apple.y) {
-            snake.grow()
-            apple.relocate(width, height)
-        } else {
-            apple.draw(canvas)
+        when (collisionWith()) {
+            is Apple -> {
+                snake.grow()
+                apple.relocate(width, height)
+            }
+            is Snake -> {
+                snake.status = Snake.STATUS_DEAD
+            }
+            else -> {
+                apple.draw(canvas)
+            }
         }
 
         snake.draw(canvas)
+    }
+
+    private fun collisionWith(): Any? {
+        return when {
+            snake.x == apple.x && snake.y == apple.y -> apple
+            snake.body.subList(0, snake.body.size - 1).contains(snake.body.last()) -> snake
+            else -> null
+        }
     }
 }

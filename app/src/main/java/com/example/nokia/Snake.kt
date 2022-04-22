@@ -6,7 +6,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import androidx.core.content.ContextCompat
 
-class Snake(context: Context, var x: Int, var y: Int, private val size: Int) {
+class Snake(private val context: Context, var x: Int, var y: Int, private val size: Int) {
 
     private val unit = context.resources.getDimension(R.dimen.unit_size).toInt()
 
@@ -14,10 +14,6 @@ class Snake(context: Context, var x: Int, var y: Int, private val size: Int) {
 
     // prevent clicking the turn button rapidly which causes direction changes multiple times
     private var directionLock = false
-
-    private val body = ArrayList<SnakeBody>().apply {
-        add(SnakeBody(x, y))
-    }
 
     // to decide where should the snake grows
     private val tail = SnakeBody(x - unit, y)
@@ -27,13 +23,31 @@ class Snake(context: Context, var x: Int, var y: Int, private val size: Int) {
         style = Paint.Style.FILL_AND_STROKE
     }
 
+    val body = ArrayList<SnakeBody>().apply {
+        add(SnakeBody(x, y))
+    }
+
+    var status = STATUS_ALIVE
+
     fun draw(canvas: Canvas) {
+        if (status == STATUS_DEAD) {
+            paint.apply {
+                color = ContextCompat.getColor(
+                    context,
+                    if (color == ContextCompat.getColor(context, R.color.black)) R.color.transparent
+                    else R.color.black
+                )
+            }
+        }
         body.forEach {
             canvas.drawRect(Rect(it.x, it.y, it.x + size, it.y + size), paint)
         }
     }
 
     fun move(boundX: Int, boundY: Int) {
+        if (status == STATUS_DEAD) {
+            return
+        }
         x = when (direction) {
             DIRECTION_LEFT -> if (x <= 0) boundX - (boundX % unit) else x - unit
             DIRECTION_RIGHT -> if (x + unit >= boundX) 0 else x + unit
@@ -95,6 +109,9 @@ class Snake(context: Context, var x: Int, var y: Int, private val size: Int) {
         const val DIRECTION_UP = 2
         const val DIRECTION_RIGHT = 3
         const val DIRECTION_DOWN = 4
+
+        const val STATUS_ALIVE = 1
+        const val STATUS_DEAD = 2
     }
 }
 

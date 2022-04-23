@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import androidx.core.content.ContextCompat
+import kotlin.math.min
 
 class Snake(private val context: Context, var x: Int, var y: Int, private val size: Int) {
 
@@ -43,7 +44,7 @@ class Snake(private val context: Context, var x: Int, var y: Int, private val si
             }
         }
         body.forEach {
-            canvas.drawRect(Rect(it.x, it.y, it.x + size, it.y + size), paint)
+            canvas.drawRect(Rect(it.x, it.y, it.x + size, min(it.y + size, canvas.height)), paint)
         }
     }
 

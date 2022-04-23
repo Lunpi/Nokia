@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import androidx.core.content.ContextCompat
+import kotlin.math.min
 import kotlin.random.Random
 
 class Apple(context: Context, var x: Int, var y: Int, private val size: Int) {
@@ -17,7 +18,7 @@ class Apple(context: Context, var x: Int, var y: Int, private val size: Int) {
     }
 
     fun draw(canvas: Canvas) {
-        canvas.drawRect(Rect(x, y, x + size, y + size), paint)
+        canvas.drawRect(Rect(x, y, x + size, min(y + size, canvas.height)), paint)
     }
 
     fun relocate(boundX: Int, boundY: Int) {

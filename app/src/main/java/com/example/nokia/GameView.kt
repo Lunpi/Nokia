@@ -3,11 +3,14 @@ package com.example.nokia
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
+import com.example.nokia.GameUtils.Companion.STATUS_ALIVE
+import com.example.nokia.GameUtils.Companion.STATUS_DEAD
 import java.util.*
 import kotlin.concurrent.timerTask
 import kotlin.math.ceil
@@ -21,7 +24,6 @@ class GameView @JvmOverloads constructor(
 
     private val unit = resources.getDimension(R.dimen.unit_size).toInt()
     private val dp = resources.displayMetrics.density
-
     private val bg = ContextCompat.getDrawable(context, R.drawable.bg_woods)
     private val shakeAnimator = ValueAnimator.ofFloat(0f, Random.nextInt(-4, 4) * dp).apply {
         interpolator = DecelerateInterpolator()
@@ -40,8 +42,11 @@ class GameView @JvmOverloads constructor(
         )
     }
 
+    private lateinit var bounds: Rect
+    private lateinit var apple: Apple
+    private lateinit var enemy: Enemy
+
     val snake = Snake(context, unit * 3, unit * 3, unit)
-    lateinit var apple: Apple
 
     init {
         Timer().scheduleAtFixedRate(timerTask {
@@ -57,12 +62,20 @@ class GameView @JvmOverloads constructor(
             Random.nextInt(0, h / unit) * unit,
             unit
         )
+        enemy = Enemy(
+            context,
+            w - (w % unit) - unit * 5,
+            h - (h % unit) - unit * 5,
+            unit * 2
+        )
         bg?.setBounds(
             left - ceil(dp * 4).toInt(),
             top - ceil(dp * 4).toInt(),
             right + ceil(dp * 4).toInt(),
             bottom + ceil(dp * 4).toInt()
         )
+        bounds = Rect(0, 0, w, h)
+        enemy.bounds = bounds
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -70,27 +83,39 @@ class GameView @JvmOverloads constructor(
         bg?.draw(canvas)
 
         snake.move(width, height)
+        enemy.action()
 
         // check collision
-        when (collisionWith()) {
+        val collision = collisionWith()
+        when (collision) {
             is Apple -> {
-                shakeAnimator.start()
                 snake.grow()
                 apple.relocate(width, height)
             }
-            is Snake -> {
-                snake.status = Snake.STATUS_DEAD
+            is Enemy -> {
+                if (enemy.status == STATUS_ALIVE) {
+                    shakeAnimator.start()
+                    enemy.knockoff(snake.direction, 3f)
+                    enemy.invincible(6)
+                }
             }
-            else -> {
-                apple.draw(canvas)
+            is Snake -> {
+                snake.status = STATUS_DEAD
             }
         }
 
         snake.draw(canvas)
+        enemy.draw(canvas)
+        if (collision !is Apple) {
+            apple.draw(canvas)
+        }
     }
 
     private fun collisionWith(): Any? {
+        val snakeHitBox = Rect(snake.x, snake.y, snake.x + snake.size, snake.y + snake.size)
+        val enemyHitBox = Rect(enemy.x, enemy.y, enemy.x + enemy.size, enemy.y + enemy.size)
         return when {
+            snakeHitBox.intersect(enemyHitBox) -> enemy
             snake.x == apple.x && snake.y == apple.y -> apple
             snake.body.subList(0, snake.body.size - 1).contains(snake.body.last()) -> snake
             else -> null

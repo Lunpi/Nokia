@@ -5,13 +5,17 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import androidx.core.content.ContextCompat
+import com.example.nokia.GameUtils.Companion.DIRECTION_DOWN
+import com.example.nokia.GameUtils.Companion.DIRECTION_LEFT
+import com.example.nokia.GameUtils.Companion.DIRECTION_RIGHT
+import com.example.nokia.GameUtils.Companion.DIRECTION_UP
+import com.example.nokia.GameUtils.Companion.STATUS_ALIVE
+import com.example.nokia.GameUtils.Companion.STATUS_DEAD
 import kotlin.math.min
 
-class Snake(private val context: Context, var x: Int, var y: Int, private val size: Int) {
+class Snake(private val context: Context, var x: Int, var y: Int, val size: Int) {
 
     private val unit = context.resources.getDimension(R.dimen.unit_size).toInt()
-
-    private var direction = DIRECTION_RIGHT
 
     // prevent clicking the turn button rapidly which causes direction changes multiple times
     private var directionLock = false
@@ -31,6 +35,7 @@ class Snake(private val context: Context, var x: Int, var y: Int, private val si
     // to decide where should the snake grows
     private val tail = SnakeBody(body.first().x - unit, y)
 
+    var direction = DIRECTION_RIGHT
     var status = STATUS_ALIVE
 
     fun draw(canvas: Canvas) {
@@ -105,17 +110,6 @@ class Snake(private val context: Context, var x: Int, var y: Int, private val si
 
     fun grow() {
         body.add(0, SnakeBody(tail.x, tail.y))
-    }
-
-
-    companion object {
-        const val DIRECTION_LEFT = 1
-        const val DIRECTION_UP = 2
-        const val DIRECTION_RIGHT = 3
-        const val DIRECTION_DOWN = 4
-
-        const val STATUS_ALIVE = 1
-        const val STATUS_DEAD = 2
     }
 }
 

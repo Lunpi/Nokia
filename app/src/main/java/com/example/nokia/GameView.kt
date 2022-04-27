@@ -74,23 +74,25 @@ class GameView @JvmOverloads constructor(
             right + ceil(dp * 4).toInt(),
             bottom + ceil(dp * 4).toInt()
         )
-        bounds = Rect(0, 0, w, h)
-        enemy.bounds = bounds
+        bounds = Rect(0, 0, w, h).also {
+            snake.bounds = it
+            enemy.bounds = it
+            apple.bounds = it
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         bg?.draw(canvas)
 
-        snake.move(width, height)
+        snake.move()
         enemy.action()
 
         // check collision
         val collision = collisionWith()
         when (collision) {
-            is Apple -> {
-                snake.grow()
-                apple.relocate(width, height)
+            is Snake -> {
+                snake.status = STATUS_DEAD
             }
             is Enemy -> {
                 if (enemy.status == STATUS_ALIVE) {
@@ -99,8 +101,9 @@ class GameView @JvmOverloads constructor(
                     enemy.invincible(6)
                 }
             }
-            is Snake -> {
-                snake.status = STATUS_DEAD
+            is Apple -> {
+                snake.grow()
+                apple.relocate()
             }
         }
 
@@ -115,9 +118,9 @@ class GameView @JvmOverloads constructor(
         val snakeHitBox = Rect(snake.x, snake.y, snake.x + snake.size, snake.y + snake.size)
         val enemyHitBox = Rect(enemy.x, enemy.y, enemy.x + enemy.size, enemy.y + enemy.size)
         return when {
+            snake.body.subList(0, snake.body.size - 1).contains(snake.body.last()) -> snake
             snakeHitBox.intersect(enemyHitBox) -> enemy
             snake.x == apple.x && snake.y == apple.y -> apple
-            snake.body.subList(0, snake.body.size - 1).contains(snake.body.last()) -> snake
             else -> null
         }
     }

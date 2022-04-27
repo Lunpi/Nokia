@@ -13,15 +13,17 @@ import com.example.nokia.GameUtils.Companion.STATUS_ALIVE
 import com.example.nokia.GameUtils.Companion.STATUS_DEAD
 import kotlin.math.min
 
-class Snake(private val context: Context, var x: Int, var y: Int, val size: Int) {
+class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
 
     private val unit = context.resources.getDimension(R.dimen.unit_size).toInt()
 
     // prevent clicking the turn button rapidly which causes direction changes multiple times
     private var directionLock = false
 
+    private val colorTransparent = ContextCompat.getColor(context, R.color.transparent)
+    private val colorBlack = ContextCompat.getColor(context, R.color.black)
     private val paint = Paint().apply {
-        color = ContextCompat.getColor(context, R.color.black)
+        color = colorBlack
         style = Paint.Style.FILL_AND_STROKE
     }
 
@@ -35,36 +37,32 @@ class Snake(private val context: Context, var x: Int, var y: Int, val size: Int)
     // to decide where should the snake grows
     private val tail = SnakeBody(body.first().x - unit, y)
 
+    lateinit var bounds: Rect
     var direction = DIRECTION_RIGHT
     var status = STATUS_ALIVE
 
     fun draw(canvas: Canvas) {
-        if (status == STATUS_DEAD) {
-            paint.apply {
-                color = ContextCompat.getColor(
-                    context,
-                    if (color == ContextCompat.getColor(context, R.color.black)) R.color.transparent
-                    else R.color.black
-                )
-            }
+        paint.color = when (status) {
+            STATUS_DEAD -> if (paint.color == colorBlack) colorTransparent else colorBlack
+            else -> colorBlack
         }
         body.forEach {
             canvas.drawRect(Rect(it.x, it.y, it.x + size, min(it.y + size, canvas.height)), paint)
         }
     }
 
-    fun move(boundX: Int, boundY: Int) {
+    fun move() {
         if (status == STATUS_DEAD) {
             return
         }
         x = when (direction) {
-            DIRECTION_LEFT -> if (x <= 0) boundX - (boundX % unit) else x - unit
-            DIRECTION_RIGHT -> if (x + unit >= boundX) 0 else x + unit
+            DIRECTION_LEFT -> if (x <= bounds.left) bounds.right - (bounds.right % unit) else x - unit
+            DIRECTION_RIGHT -> if (x + unit >= bounds.right) bounds.left else x + unit
             else -> x
         }
         y = when (direction) {
-            DIRECTION_UP -> if (y <= 0) boundY - (boundY % unit) else y - unit
-            DIRECTION_DOWN -> if (y + unit >= boundY) 0 else y + unit
+            DIRECTION_UP -> if (y <= bounds.top) bounds.bottom - (bounds.bottom % unit) else y - unit
+            DIRECTION_DOWN -> if (y + unit >= bounds.bottom) bounds.top else y + unit
             else -> y
         }
 

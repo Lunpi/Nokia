@@ -17,12 +17,14 @@ class Apple(context: Context, var x: Int, var y: Int, private val size: Int) {
         style = Paint.Style.FILL_AND_STROKE
     }
 
+    lateinit var bounds: Rect
+
     fun draw(canvas: Canvas) {
         canvas.drawRect(Rect(x, y, x + size, min(y + size, canvas.height)), paint)
     }
 
-    fun relocate(boundX: Int, boundY: Int) {
-        x = Random.nextInt(0, boundX / unit) * unit
-        y = Random.nextInt(0, boundY / unit) * unit
+    fun relocate() {
+        x = Random.nextInt(bounds.left, bounds.right / unit) * unit
+        y = Random.nextInt(bounds.top, bounds.bottom / unit) * unit
     }
 }

@@ -8,7 +8,7 @@ import androidx.core.content.ContextCompat
 import kotlin.math.min
 import kotlin.random.Random
 
-class Apple(context: Context, var x: Int, var y: Int, private val size: Int) {
+class Apple(context: Context, var x: Int, var y: Int, val size: Int) {
 
     private val unit = context.resources.getDimension(R.dimen.unit_size).toInt()
 

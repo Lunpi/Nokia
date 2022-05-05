@@ -17,7 +17,7 @@ import kotlin.math.min
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class Enemy(context: Context, var x: Int, var y: Int, val size: Int) {
+class Enemy(private val context: Context, var x: Int, var y: Int, val size: Int) {
 
     private val unit = context.resources.getDimension(R.dimen.unit_size).toInt()
 
@@ -30,11 +30,13 @@ class Enemy(context: Context, var x: Int, var y: Int, val size: Int) {
 
     private var invincibleCountDownTimer = 0
     private var moveCountDownTimer = 0
+    private var attackCoolDownTimer = 0
     private var direction = DIRECTION_STILL
     private var moveSpeed = .5f
 
     lateinit var bounds: Rect
     var status = STATUS_ALIVE
+    val projectiles = ArrayList<Projectile>()
 
     private fun setMovement(direction: Int, time: Int) {
         this.direction = direction
@@ -55,6 +57,18 @@ class Enemy(context: Context, var x: Int, var y: Int, val size: Int) {
         }
     }
 
+    private fun attack() {
+        attackCoolDownTimer = 30
+        projectiles.apply {
+            val centerX = (x + x + this@Enemy.size) / 2
+            val centerY = (y + y + this@Enemy.size) / 2
+            add(Projectile(context, x, centerY, unit, DIRECTION_LEFT, .5f))
+            add(Projectile(context, centerX, y, unit, DIRECTION_UP, .5f))
+            add(Projectile(context, x + this@Enemy.size, centerY, unit, DIRECTION_RIGHT, .5f))
+            add(Projectile(context, centerX, y + this@Enemy.size, unit, DIRECTION_DOWN, .5f))
+        }
+    }
+
     fun draw(canvas: Canvas) {
         paint.color = when (status) {
             STATUS_INVINCIBLE -> if (paint.color == colorBlue) colorTransparent else colorBlue
@@ -63,7 +77,7 @@ class Enemy(context: Context, var x: Int, var y: Int, val size: Int) {
         canvas.drawRect(Rect(x, y, x + size, min(y + size, canvas.height)), paint)
     }
 
-    fun action() {
+    fun update() {
         if (status == STATUS_INVINCIBLE) {
             if (invincibleCountDownTimer > 0) {
                 invincibleCountDownTimer--
@@ -72,14 +86,25 @@ class Enemy(context: Context, var x: Int, var y: Int, val size: Int) {
             }
         }
         if (moveCountDownTimer > 0) {
-            move(direction, moveSpeed)
             moveCountDownTimer--
         } else {
             setMovement(Random.nextInt(DIRECTION_DOWN..DIRECTION_UP), 6)
         }
+        if (attackCoolDownTimer > 0) {
+            attackCoolDownTimer--
+        }
     }
 
-    fun knockoff(direction: Int, strength: Float) {
+    fun action() {
+        if (moveCountDownTimer > 0) {
+            move(direction, moveSpeed)
+        }
+        if (direction == DIRECTION_STILL && attackCoolDownTimer == 0 && moveCountDownTimer == 3) {
+            attack()
+        }
+    }
+
+    fun knockBack(direction: Int, strength: Float) {
         move(direction, strength)
         setMovement(DIRECTION_STILL, 3)
     }

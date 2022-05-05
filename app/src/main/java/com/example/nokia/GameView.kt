@@ -85,11 +85,20 @@ class GameView @JvmOverloads constructor(
         super.onDraw(canvas)
         bg?.draw(canvas)
 
-        snake.move()
-        enemy.action()
+        snake.run {
+            update()
+            move()
+        }
+        enemy.run {
+            update()
+            action()
+            projectiles.forEach {
+                it.move()
+            }
+        }
 
         // check collision
-        val collision = collisionWith()
+        val collision = collideWith()
         when (collision) {
             is Snake -> {
                 snake.status = STATUS_DEAD
@@ -97,13 +106,19 @@ class GameView @JvmOverloads constructor(
             is Enemy -> {
                 if (enemy.status == STATUS_ALIVE) {
                     shakeAnimator.start()
-                    enemy.knockoff(snake.direction, 3f)
+                    enemy.knockBack(snake.direction, 3f)
                     enemy.invincible(6)
                 }
             }
             is Apple -> {
                 snake.grow()
                 apple.relocate()
+            }
+            is Projectile -> {
+                if (snake.status == STATUS_ALIVE) {
+                    shakeAnimator.start()
+                    snake.invincible(6)
+                }
             }
         }
 
@@ -112,16 +127,55 @@ class GameView @JvmOverloads constructor(
         if (collision !is Apple) {
             apple.draw(canvas)
         }
+        enemy.projectiles.run {
+            forEach { projectile ->
+                if (collision != projectile) {
+                    projectile.draw(canvas)
+                }
+            }
+            filter {
+                (it.x !in bounds.left..bounds.right) || (it.y !in bounds.top..bounds.bottom) || it == collision
+            }.forEach {
+                remove(it)
+            }
+        }
     }
 
-    private fun collisionWith(): Any? {
-        val snakeHitBox = Rect(snake.x, snake.y, snake.x + snake.size, snake.y + snake.size)
-        val enemyHitBox = Rect(enemy.x, enemy.y, enemy.x + enemy.size, enemy.y + enemy.size)
-        return when {
-            snake.body.subList(0, snake.body.size - 1).contains(snake.body.last()) -> snake
-            snakeHitBox.intersect(enemyHitBox) -> enemy
-            snake.x == apple.x && snake.y == apple.y -> apple
-            else -> null
+    private fun collideWith(): Any? {
+        val snakeHeadHitBox = Rect(snake.x, snake.y, snake.x + snake.size, snake.y + snake.size)
+        val snakeBodyHitBox = ArrayList<Rect>().apply {
+            snake.body.forEach {
+                add(Rect(it.x, it.y, it.x + snake.size, it.y + snake.size))
+            }
         }
+        val enemyHitBox = Rect(enemy.x, enemy.y, enemy.x + enemy.size, enemy.y + enemy.size)
+        val appleHitBox = Rect(apple.x, apple.y, apple.x + apple.size, apple.y + apple.size)
+
+        if (snake.body.subList(0, snake.body.size - 1).contains(snake.body.last())) {
+            return snake
+        }
+        if (snakeHeadHitBox.intersect(enemyHitBox)) {
+            return enemy
+        }
+        enemy.projectiles.forEach { projectile ->
+            val projectileHitBox = Rect(
+                projectile.x - projectile.size,
+                projectile.y - projectile.size,
+                projectile.x + projectile.size,
+                projectile.y + projectile.size
+            )
+            if (snakeHeadHitBox.intersect(projectileHitBox)) {
+                return projectile
+            }
+            snakeBodyHitBox.forEach { bodyHitBox ->
+                if (bodyHitBox.intersect(projectileHitBox)) {
+                    return projectile
+                }
+            }
+        }
+        if (snakeHeadHitBox.intersect(appleHitBox)) {
+            return apple
+        }
+        return null
     }
 }

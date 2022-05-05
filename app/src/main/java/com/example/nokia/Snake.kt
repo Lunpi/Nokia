@@ -11,6 +11,7 @@ import com.example.nokia.GameUtils.Companion.DIRECTION_RIGHT
 import com.example.nokia.GameUtils.Companion.DIRECTION_UP
 import com.example.nokia.GameUtils.Companion.STATUS_ALIVE
 import com.example.nokia.GameUtils.Companion.STATUS_DEAD
+import com.example.nokia.GameUtils.Companion.STATUS_INVINCIBLE
 import kotlin.math.min
 
 class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
@@ -26,6 +27,7 @@ class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
         color = colorBlack
         style = Paint.Style.FILL_AND_STROKE
     }
+    private var invincibleCountDownTimer = 0
 
     val body = ArrayList<SnakeBody>().apply {
         // initial length: 3
@@ -43,7 +45,7 @@ class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
 
     fun draw(canvas: Canvas) {
         paint.color = when (status) {
-            STATUS_DEAD -> if (paint.color == colorBlack) colorTransparent else colorBlack
+            STATUS_DEAD, STATUS_INVINCIBLE -> if (paint.color == colorBlack) colorTransparent else colorBlack
             else -> colorBlack
         }
         body.forEach {
@@ -108,6 +110,21 @@ class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
 
     fun grow() {
         body.add(0, SnakeBody(tail.x, tail.y))
+    }
+
+    fun update() {
+        if (status == STATUS_INVINCIBLE) {
+            if (invincibleCountDownTimer > 0) {
+                invincibleCountDownTimer--
+            } else {
+                status = STATUS_ALIVE
+            }
+        }
+    }
+
+    fun invincible(time: Int) {
+        status = STATUS_INVINCIBLE
+        invincibleCountDownTimer = time
     }
 }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Rect
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import kotlin.math.max
 import kotlin.math.min
 
@@ -11,11 +12,13 @@ class HealthBar(context: Context, var capacity: Int, var hp: Int, val color: Int
 
     private val leftHalf =
         ContextCompat.getDrawable(context, R.drawable.ic_heart_left_half_24dp)?.apply {
-            setTint(color)
+            mutate()
+            DrawableCompat.setTint(this, color)
         }
     private val rightHalf =
         ContextCompat.getDrawable(context, R.drawable.ic_heart_right_half_24dp)?.apply {
-            setTint(color)
+            mutate()
+            DrawableCompat.setTint(this, color)
         }
     val heartSize = leftHalf?.intrinsicWidth ?: 0
 

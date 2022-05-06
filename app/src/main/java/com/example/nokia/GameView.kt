@@ -86,12 +86,16 @@ class GameView @JvmOverloads constructor(
         bg?.draw(canvas)
 
         snake.run {
-            update()
-            move()
+            if (status != STATUS_DEAD) {
+                update()
+                move()
+            }
         }
         enemy.run {
-            update()
-            action()
+            if (status != STATUS_DEAD) {
+                update()
+                action()
+            }
             projectiles.forEach {
                 it.move()
             }
@@ -106,42 +110,59 @@ class GameView @JvmOverloads constructor(
             is Enemy -> {
                 if (enemy.status == STATUS_ALIVE) {
                     shakeAnimator.start()
-                    enemy.knockBack(snake.direction, 3f)
-                    enemy.invincible(6)
+                    enemy.run {
+                        getDamaged(2)
+                        knockBack(snake.direction, 3f)
+                    }
                 }
             }
             is Apple -> {
-                snake.grow()
+                snake.run {
+                    healthBar.increase(1)
+                    grow()
+                }
                 apple.relocate()
             }
             is Projectile -> {
                 if (snake.status == STATUS_ALIVE) {
                     shakeAnimator.start()
-                    snake.invincible(6)
+                    snake.getDamaged(2)
                 }
             }
         }
 
-        snake.draw(canvas)
-        enemy.draw(canvas)
         if (collision !is Apple) {
             apple.draw(canvas)
         }
-        enemy.projectiles.run {
-            forEach { projectile ->
-                if (collision != projectile) {
-                    projectile.draw(canvas)
+        snake.run {
+            draw(canvas)
+            healthBar.draw(canvas, left, top)
+        }
+        enemy.run {
+            draw(canvas)
+            healthBar.draw(canvas, left, bottom - healthBar.heartSize)
+            projectiles.run {
+                forEach { projectile ->
+                    if (collision != projectile) {
+                        projectile.draw(canvas)
+                    }
                 }
-            }
-            filter {
-                (it.x !in bounds.left..bounds.right) || (it.y !in bounds.top..bounds.bottom) || it == collision
-            }.forEach {
-                remove(it)
+                filter {
+                    (it.x !in this@GameView.bounds.left..this@GameView.bounds.right)
+                            || (it.y !in this@GameView.bounds.top..this@GameView.bounds.bottom)
+                            || it == collision
+                }.forEach {
+                    remove(it)
+                }
             }
         }
     }
 
     private fun collideWith(): Any? {
+        if (snake.status == STATUS_DEAD) {
+            return null
+        }
+
         val snakeHeadHitBox = Rect(snake.x, snake.y, snake.x + snake.size, snake.y + snake.size)
         val snakeBodyHitBox = ArrayList<Rect>().apply {
             snake.body.forEach {

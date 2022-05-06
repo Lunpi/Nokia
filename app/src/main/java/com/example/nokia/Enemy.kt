@@ -11,6 +11,7 @@ import com.example.nokia.GameUtils.Companion.DIRECTION_RIGHT
 import com.example.nokia.GameUtils.Companion.DIRECTION_STILL
 import com.example.nokia.GameUtils.Companion.DIRECTION_UP
 import com.example.nokia.GameUtils.Companion.STATUS_ALIVE
+import com.example.nokia.GameUtils.Companion.STATUS_DEAD
 import com.example.nokia.GameUtils.Companion.STATUS_INVINCIBLE
 import kotlin.math.max
 import kotlin.math.min
@@ -23,6 +24,7 @@ class Enemy(private val context: Context, var x: Int, var y: Int, val size: Int)
 
     private val colorTransparent = ContextCompat.getColor(context, R.color.transparent)
     private val colorBlue = ContextCompat.getColor(context, R.color.purple_500)
+    private val colorPurple = ContextCompat.getColor(context, R.color.purple_700)
     private val paint = Paint().apply {
         color = colorBlue
         style = Paint.Style.FILL_AND_STROKE
@@ -37,6 +39,7 @@ class Enemy(private val context: Context, var x: Int, var y: Int, val size: Int)
     lateinit var bounds: Rect
     var status = STATUS_ALIVE
     val projectiles = ArrayList<Projectile>()
+    val healthBar = HealthBar(context, 18, 18, colorPurple)
 
     private fun setMovement(direction: Int, time: Int) {
         this.direction = direction
@@ -71,7 +74,7 @@ class Enemy(private val context: Context, var x: Int, var y: Int, val size: Int)
 
     fun draw(canvas: Canvas) {
         paint.color = when (status) {
-            STATUS_INVINCIBLE -> if (paint.color == colorBlue) colorTransparent else colorBlue
+            STATUS_DEAD, STATUS_INVINCIBLE -> if (paint.color == colorBlue) colorTransparent else colorBlue
             else -> colorBlue
         }
         canvas.drawRect(Rect(x, y, x + size, min(y + size, canvas.height)), paint)
@@ -112,5 +115,14 @@ class Enemy(private val context: Context, var x: Int, var y: Int, val size: Int)
     fun invincible(time: Int) {
         status = STATUS_INVINCIBLE
         invincibleCountDownTimer = time
+    }
+
+    fun getDamaged(damage: Int) {
+        healthBar.decrease(damage)
+        if (healthBar.hp > 0) {
+            invincible(6)
+        } else {
+            status = STATUS_DEAD
+        }
     }
 }

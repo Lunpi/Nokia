@@ -23,6 +23,7 @@ class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
 
     private val colorTransparent = ContextCompat.getColor(context, R.color.transparent)
     private val colorBlack = ContextCompat.getColor(context, R.color.black)
+    private val colorRed = ContextCompat.getColor(context, R.color.apple)
     private val paint = Paint().apply {
         color = colorBlack
         style = Paint.Style.FILL_AND_STROKE
@@ -42,6 +43,7 @@ class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
     lateinit var bounds: Rect
     var direction = DIRECTION_RIGHT
     var status = STATUS_ALIVE
+    val healthBar = HealthBar(context, 6, 6, colorRed)
 
     fun draw(canvas: Canvas) {
         paint.color = when (status) {
@@ -54,9 +56,6 @@ class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
     }
 
     fun move() {
-        if (status == STATUS_DEAD) {
-            return
-        }
         x = when (direction) {
             DIRECTION_LEFT -> if (x <= bounds.left) bounds.right - (bounds.right % unit) else x - unit
             DIRECTION_RIGHT -> if (x + unit >= bounds.right) bounds.left else x + unit
@@ -125,6 +124,15 @@ class Snake(context: Context, var x: Int, var y: Int, val size: Int) {
     fun invincible(time: Int) {
         status = STATUS_INVINCIBLE
         invincibleCountDownTimer = time
+    }
+
+    fun getDamaged(damage: Int) {
+        healthBar.decrease(damage)
+        if (healthBar.hp > 0) {
+            invincible(6)
+        } else {
+            status = STATUS_DEAD
+        }
     }
 }
 
